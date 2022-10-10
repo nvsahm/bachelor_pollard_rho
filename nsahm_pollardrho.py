@@ -1,13 +1,14 @@
 import random
 import multiprocessing
 
+#der Pollard-Rho-Algorithmus benötigt seinen generator(Erzeuger), modulo-Wert(Gruppe p), Startwert x aus der Gruppe und Subsets mit den Gruppenelementen
 generator = 0
 modulo_value = 0
 start_x = 0
 subsets = []
 group = []
 
-
+#prüfe, ob der Input eine Zahl ist
 def clean_number_input():
     while 1:
         try:
@@ -17,7 +18,7 @@ def clean_number_input():
             print("Input was not a Number, try again")
             continue
 
-
+#Frage Eingabewerte in der Konsole ab
 def get_inputs():
     global generator
     global modulo_value
@@ -26,7 +27,7 @@ def get_inputs():
     print("Enter modulo_value")
     modulo_value = clean_number_input()
 
-
+#Händisches Eingeben der sonstigen Zufallswerte u0 und v0 oder zufälliges Erzeugen, Abfragen welche Anzahl an Durchgängen für zufällige Werte gewünscht ist
 def get_manual():
     global group
     print("Do you want to enter u ,v manual? Type Yes or No.")
@@ -57,7 +58,7 @@ def get_manual():
         auto = get_auto()
     return u, v, multiple, auto
 
-
+#Multiprocessing um den Ablauf mit großen Werten zu beschleunigen
 def get_auto():
     print("Do you want to run in multiprocessing mode? Uses a lot of computing power and calculate all cases. Type Yes or No.")
     man = input().lower()
@@ -69,7 +70,7 @@ def get_auto():
         print(f"Your Input {man} was not expected. Please Type Yes or No")
         man = input()
 
-
+#Startwert x abfragen
 def get_x_manual():
     global group
     print("Do you want to enter x manual? Type Yes or No.")
@@ -91,7 +92,7 @@ def get_x_manual():
         man = input()
     return x
 
-
+#Subsets bilden
 def generate_sub_group(j, rj, local_generator, local_modulo_value, return_dict):
     global group
     l = []
@@ -100,7 +101,7 @@ def generate_sub_group(j, rj, local_generator, local_modulo_value, return_dict):
         l.append(((local_generator ** i) % local_modulo_value))
     return_dict[j] = l
 
-
+#Gruppe mit Eingabewerten bilden
 def generate_group():
     global generator
     global modulo_value
@@ -130,12 +131,12 @@ def generate_group():
         g.extend(return_dict.values()[i])
     return g
 
-
+#teile eine Liste
 def split_list(a, n):
     k, m = divmod(len(a), n)
     return list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
 
-
+#Formel P und ihre verschiedenen Varianten um z und p zu berechnen
 def p(z, p_u, p_v, start_x_local, generator_local, modulo_value_local, group_local, subsets_local):
     if z in subsets_local[0]:
         z = start_x_local * z
@@ -152,13 +153,13 @@ def p(z, p_u, p_v, start_x_local, generator_local, modulo_value_local, group_loc
     p_v = p_v % len(group_local)
     return z, p_u, p_v
 
-
+#Groesster gemeinsamer Teiler
 def gcd(x, y):
     while y:
         x, y = y, x % y
     return x
 
-
+#Bei Failure versuche den Bemerkungs-Exception-Case, ansonsten ist das Ergebnis Failure
 def failure_exception(w, sigma_u, tau_u, sigma_v, tau_v, y, line, generator_local, modulo_value_local, group_local, start_x_local):
     print("Trying the Exception Case")
     d = len(group_local) / w
@@ -172,7 +173,7 @@ def failure_exception(w, sigma_u, tau_u, sigma_v, tau_v, y, line, generator_loca
     print("The Exception Case failed")
     return "Failure", "Failure"
 
-
+#Berechne und gebe aus
 def iterate(u, v, large_mode, start_x_local, generator_local, modulo_value_local, group_local, subsets_local):
     x = int((int(int(start_x_local) ** int(u)) * int(generator_local ** v) % modulo_value_local))
     y = x
@@ -203,7 +204,7 @@ def iterate(u, v, large_mode, start_x_local, generator_local, modulo_value_local
             start_x_local, generator_local, modulo_value_local, group_local, subsets_local)
         k += 1
 
-
+##Geburtstagsfall abdecken, bei dem der Eingabewert abgeaendert wird
 def input_birthday():
     print("Please enter your Birthday in the following Format: YYYYMMDD. Example Date: 15.02.1999 Format: 19990215")
     birthday = clean_number_input()
@@ -215,7 +216,7 @@ def input_birthday():
         birthday = clean_number_input()
         birthday_str = str(birthday)
 
-
+#Frage ob der Geburtstagsmodus gewuenscht ist und berechne ihn gegebenenfalls
 def check_birthday_mode():
     global group
     global generator
@@ -247,7 +248,7 @@ def iterate_multiple(j, u, v, start_x_local, generator_local, modulo_value_local
     l = [a, line]
     return_dict[j] = l
 
-
+#gebe das erfolgreiche Ergebnis aus
 def print_success(a, line):
     global start_x
     print(f"The result of the Pollard Rho method is {a}")
@@ -256,7 +257,7 @@ def print_success(a, line):
     print(f"The successful line was: {line}")
     print(f"The complete formula is now: dlog{gen}({start_x}) = {a}")
 
-
+#Main-Methode
 def main():
     global generator
     global modulo_value
@@ -265,7 +266,7 @@ def main():
     birthday_mode = check_birthday_mode()
     if not birthday_mode:
         get_inputs()
-    print("Generating Group. (This can take a while when using large Modulo Values which are no prime numbers")
+    print("Generating Group. (This can take a while when using large Modulo Values which are no prime numbers)")
     group = generate_group()
     print("Removing Duplicates")
     group = list(dict.fromkeys(group))
